@@ -11,14 +11,16 @@ export interface WatcherOptions {
   l1: Layer
   l2: Layer
   pollInterval?: number
-  blocksToFetch?: number
+  l1BlocksToFetch?: number
+  l2BlocksToFetch?: number
 }
 
 export class Watcher {
   public l1: Layer
   public l2: Layer
   public pollInterval = 3000
-  public blocksToFetch = 2000
+  public l1BlocksToFetch = 2000
+  public l2BlocksToFetch = 9999
 
   constructor(opts: WatcherOptions) {
     this.l1 = opts.l1
@@ -26,8 +28,11 @@ export class Watcher {
     if (opts.pollInterval) {
       this.pollInterval = opts.pollInterval
     }
-    if (opts.blocksToFetch) {
-      this.blocksToFetch = opts.blocksToFetch
+    if (opts.l1BlocksToFetch) {
+      this.l1BlocksToFetch = opts.l1BlocksToFetch
+    }
+    if (opts.l2BlocksToFetch) {
+      this.l2BlocksToFetch = opts.l2BlocksToFetch
     }
   }
 
@@ -42,14 +47,24 @@ export class Watcher {
     l2ToL1MsgHash: string,
     pollForPending = true
   ): Promise<TransactionReceipt> {
-    return this.getTransactionReceipt(this.l1, l2ToL1MsgHash, pollForPending)
+    return this.getTransactionReceipt(
+      this.l1,
+      l2ToL1MsgHash,
+      pollForPending,
+      this.l1BlocksToFetch
+    )
   }
 
   public async getL2TransactionReceipt(
     l1ToL2MsgHash: string,
     pollForPending = true
   ): Promise<TransactionReceipt> {
-    return this.getTransactionReceipt(this.l2, l1ToL2MsgHash, pollForPending)
+    return this.getTransactionReceipt(
+      this.l2,
+      l1ToL2MsgHash,
+      pollForPending,
+      this.l2BlocksToFetch
+    )
   }
 
   public async getMessageHashesFromTx(
@@ -80,14 +95,15 @@ export class Watcher {
   public async getTransactionReceipt(
     layer: Layer,
     msgHash: string,
-    pollForPending = true
+    pollForPending = true,
+    blocksToFetch: number
   ): Promise<TransactionReceipt> {
     let matches: ethers.providers.Log[] = []
 
     // scan for transaction with specified message
     while (matches.length === 0) {
       const blockNumber = await layer.provider.getBlockNumber()
-      const startingBlock = Math.max(blockNumber - this.blocksToFetch, 0)
+      const startingBlock = Math.max(blockNumber - blocksToFetch, 0)
       const successFilter: ethers.providers.Filter = {
         address: layer.messengerAddress,
         topics: [ethers.utils.id(`RelayedMessage(bytes32)`)],
