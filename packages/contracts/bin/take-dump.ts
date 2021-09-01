@@ -18,7 +18,6 @@ import { RollupDeployConfig } from '../src/contract-deployment'
   const config = {
     gasPriceOracleConfig: {
       owner: GAS_PRICE_ORACLE_OWNER,
-      initialGasPrice: 0,
     },
   }
 

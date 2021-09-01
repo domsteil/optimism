@@ -15,7 +15,6 @@ export interface RollupDeployConfig {
   }
   gasPriceOracleConfig: {
     owner: string | Signer
-    initialGasPrice: number
   }
   addressManager?: string
   dependencies?: string[]
@@ -74,7 +73,6 @@ export const makeContractDeployConfig = async (
           }
           return config.gasPriceOracleConfig.owner
         })(),
-        config.gasPriceOracleConfig.initialGasPrice,
       ],
     },
     OVM_SequencerFeeVault: {
