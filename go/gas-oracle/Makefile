@@ -21,11 +21,16 @@ test:
 lint:
 	golangci-lint run ./...
 
-binding:
+abi:
+	cat ../../packages/contracts/artifacts/contracts/optimistic-ethereum/OVM/predeploys/OVM_GasPriceOracle.sol/OVM_GasPriceOracle.json \
+		| jq '{abi,bytecode}' \
+		> abis/OVM_GasPriceOracle.json
+
+binding: abi
 	$(eval temp := $(shell mktemp))
 
 	cat abis/OVM_GasPriceOracle.json \
-		| jq -r .bin > $(temp)
+		| jq -r .bytecode > $(temp)
 
 	cat abis/OVM_GasPriceOracle.json \
 		| jq .abi \
