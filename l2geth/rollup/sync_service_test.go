@@ -499,16 +499,23 @@ func TestSyncServiceL1GasPrice(t *testing.T) {
 		t.Fatal("expected 0 gas price, got", gasBefore)
 	}
 
+	state, err := service.bc.State()
+	if err != nil {
+		t.Fatal("Cannot get state db")
+	}
+	l1GasPrice := big.NewInt(100000000000)
+	state.SetState(l2GasPriceOracleAddress, l1GasPriceSlot, common.BigToHash(l1GasPrice))
+	_, _ = state.Commit(false)
+
 	// Update the gas price
-	service.updateL1GasPrice()
+	service.updateL1GasPrice(state)
 
 	gasAfter, err := service.RollupGpo.SuggestL1GasPrice(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expect, _ := service.client.GetL1GasPrice()
-	if gasAfter.Cmp(expect) != 0 {
+	if gasAfter.Cmp(l1GasPrice) != 0 {
 		t.Fatal("expected 100 gas price, got", gasAfter)
 	}
 }

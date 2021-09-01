@@ -41,6 +41,9 @@ var (
 	// l2GasPriceSlot refers to the storage slot that the L2 gas price is stored
 	// in in the OVM_GasPriceOracle predeploy
 	l2GasPriceSlot = common.BigToHash(big.NewInt(1))
+	// l1GasPriceSlot refers to the storage slot that the L1 gas price is stored
+	// in in the OVM_GasPriceOracle predeploy
+	l1GasPriceSlot = common.BigToHash(big.NewInt(2))
 	// l2GasPriceOracleOwnerSlot refers to the storage slot that the owner of
 	// the OVM_GasPriceOracle is stored in
 	l2GasPriceOracleOwnerSlot = common.BigToHash(big.NewInt(0))
@@ -255,9 +258,6 @@ func (s *SyncService) Start() error {
 	if err := s.updateGasPriceOracleCache(nil); err != nil {
 		return err
 	}
-	if err := s.updateL1GasPrice(); err != nil {
-		return err
-	}
 
 	if s.verifier {
 		go s.VerifierLoop()
@@ -377,9 +377,6 @@ func (s *SyncService) VerifierLoop() {
 	log.Info("Starting Verifier Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
 	t := time.NewTicker(s.pollInterval)
 	for ; true; <-t.C {
-		if err := s.updateL1GasPrice(); err != nil {
-			log.Error("Cannot update L1 gas price", "msg", err)
-		}
 		if err := s.verify(); err != nil {
 			log.Error("Could not verify", "error", err)
 		}
@@ -411,9 +408,6 @@ func (s *SyncService) SequencerLoop() {
 	log.Info("Starting Sequencer Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
 	t := time.NewTicker(s.pollInterval)
 	for ; true; <-t.C {
-		if err := s.updateL1GasPrice(); err != nil {
-			log.Error("Cannot update L1 gas price", "msg", err)
-		}
 		s.txLock.Lock()
 		if err := s.sequence(); err != nil {
 			log.Error("Could not sequence", "error", err)
@@ -475,12 +469,16 @@ func (s *SyncService) syncTransactionsToTip() error {
 // updateL1GasPrice queries for the current L1 gas price and then stores it
 // in the L1 Gas Price Oracle. This must be called over time to properly
 // estimate the transaction fees that the sequencer should charge.
-func (s *SyncService) updateL1GasPrice() error {
-	l1GasPrice, err := s.client.GetL1GasPrice()
-	if err != nil {
-		return fmt.Errorf("cannot fetch L1 gas price: %w", err)
+func (s *SyncService) updateL1GasPrice(statedb *state.StateDB) error {
+	var err error
+	if statedb == nil {
+		statedb, err = s.bc.State()
+		if err != nil {
+			return err
+		}
 	}
-	s.RollupGpo.SetL1GasPrice(l1GasPrice)
+	result := statedb.GetState(l2GasPriceOracleAddress, l1GasPriceSlot)
+	s.RollupGpo.SetL1GasPrice(result.Big())
 	return nil
 }
 
@@ -534,6 +532,9 @@ func (s *SyncService) updateGasPriceOracleCache(hash *common.Hash) error {
 		return err
 	}
 	if err := s.updateL2GasPrice(statedb); err != nil {
+		return err
+	}
+	if err := s.updateL1GasPrice(statedb); err != nil {
 		return err
 	}
 	return nil
