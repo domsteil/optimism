@@ -93,9 +93,5 @@ export const getL2ContractData = () => {
       abi: OVM_DeployerWhitelist.abi,
       address: l2Addresses.OVM_DeployerWhitelist,
     },
-    Lib_AddressManager: {
-      abi: Lib_AddressManager.abi,
-      address: l2Addresses.Lib_AddressManager,
-    },
   }
 }

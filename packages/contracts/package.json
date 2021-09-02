@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@codechecks/client": "0.1.10-beta",
+    "@defi-wonderland/smock": "^2.0.2",
     "@eth-optimism/smock": "^1.1.10",
     "@ethersproject/transactions": "^5.4.0",
     "@nomiclabs/hardhat-ethers": "^2.0.1",

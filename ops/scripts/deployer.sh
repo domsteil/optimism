@@ -18,5 +18,16 @@ curl \
 
 yarn run deploy
 
+function envSet() {
+    VAR=$1
+    export $VAR=$(cat ./dist/dumps/addresses.json | jq -r ".$2")
+}
+
+# set the address to the proxy gateway if possible
+envSet L1_STANDARD_BRIDGE_ADDRESS Proxy__OVM_L1StandardBridge
+if [ $L1_STANDARD_BRIDGE_ADDRESS == null ]; then
+    envSet L1_STANDARD_BRIDGE_ADDRESS OVM_L1StandardBridge
+fi
+
 # serve the addrs and the state dump
 exec ./bin/serve_dump.sh
