@@ -71,11 +71,16 @@ export const ceilmod = (a: BigNumber | number, b: BigNumber | number) => {
 }
 
 export const calculateL1GasLimit = (data: string | Buffer): BigNumber => {
+  const cost = calculateL1Cost(data)
+  const gasLimit = cost.add(overhead)
+  return BigNumber.from(gasLimit)
+}
+
+export const calculateL1Cost = (data: string | Buffer): BigNumber => {
   const [zeroes, ones] = zeroesAndOnes(data)
   const zeroesCost = zeroes * txDataZeroGas
   const onesCost = ones * txDataNonZeroGasEIP2028
-  const gasLimit = zeroesCost + onesCost + overhead
-  return BigNumber.from(gasLimit)
+  return BigNumber.from(onesCost).add(zeroesCost)
 }
 
 export const zeroesAndOnes = (data: Buffer | string): Array<number> => {
