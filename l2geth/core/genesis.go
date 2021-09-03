@@ -64,15 +64,6 @@ type Genesis struct {
 	Number     uint64      `json:"number"`
 	GasUsed    uint64      `json:"gasUsed"`
 	ParentHash common.Hash `json:"parentHash"`
-
-	// OVM Specific, used to initialize the l1XDomainMessengerAddress
-	// in the genesis state
-	L1FeeWalletAddress            common.Address `json:"-"`
-	L1CrossDomainMessengerAddress common.Address `json:"-"`
-	AddressManagerOwnerAddress    common.Address `json:"-"`
-	GasPriceOracleOwnerAddress    common.Address `json:"-"`
-	L1StandardBridgeAddress       common.Address `json:"-"`
-	ChainID                       *big.Int       `json:"-"`
 }
 
 // GenesisAlloc specifies the initial state that is part of the genesis block.
@@ -401,7 +392,7 @@ func DefaultGoerliGenesisBlock() *Genesis {
 // Additional runtime parameters are passed through that impact
 // the genesis state. An "incompatible genesis block" error means that
 // these params were altered since the initial creation of the datadir.
-func DeveloperGenesisBlock(period uint64, faucet, l1XDomainMessengerAddress common.Address, l1StandardBridgeAddress common.Address, addrManagerOwnerAddress, gpoOwnerAddress, l1FeeWalletAddress common.Address, stateDumpPath string, chainID *big.Int, gasLimit uint64) *Genesis {
+func DeveloperGenesisBlock(period uint64, faucet common.Address, stateDumpPath string, chainID *big.Int, gasLimit uint64) *Genesis {
 	// Override the default period to the user requested one
 	config := *params.AllCliqueProtocolChanges
 	config.Clique.Period = period
@@ -449,15 +440,6 @@ func DeveloperGenesisBlock(period uint64, faucet, l1XDomainMessengerAddress comm
 		GasLimit:   gasLimit,
 		Difficulty: big.NewInt(1),
 		Alloc:      alloc,
-		// UsingOVM
-		// Add additional properties to the genesis block so that they can
-		// be added into the initial genesis state at runtime
-		L1CrossDomainMessengerAddress: l1XDomainMessengerAddress,
-		L1FeeWalletAddress:            l1FeeWalletAddress,
-		AddressManagerOwnerAddress:    addrManagerOwnerAddress,
-		GasPriceOracleOwnerAddress:    gpoOwnerAddress,
-		L1StandardBridgeAddress:       l1StandardBridgeAddress,
-		ChainID:                       config.ChainID,
 	}
 }
 
