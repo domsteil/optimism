@@ -69,7 +69,6 @@ const OVM_L2CrossDomainMessenger = require('../artifacts/contracts/L2/messaging/
 const OVM_L2ToL1MessagePasser = require('../artifacts/contracts/L2/predeploys/OVM_L2ToL1MessagePasser.sol/OVM_L2ToL1MessagePasser.json')
 const OVM_L1MessageSender = require('../artifacts/contracts/L2/predeploys/iOVM_L1MessageSender.sol/iOVM_L1MessageSender.json')
 const OVM_DeployerWhitelist = require('../artifacts/contracts/L2/predeploys/OVM_DeployerWhitelist.sol/OVM_DeployerWhitelist.json')
-const Lib_AddressManager = require('../artifacts/contracts/libraries/resolver/Lib_AddressManager.sol/Lib_AddressManager.json')
 
 export const getL2ContractData = () => {
   return {
