@@ -29,5 +29,13 @@ if [ $L1_STANDARD_BRIDGE_ADDRESS == null ]; then
     envSet L1_STANDARD_BRIDGE_ADDRESS OVM_L1StandardBridge
 fi
 
+envSet L1_CROSS_DOMAIN_MESSENGER_ADDRESS Proxy__OVM_L1CrossDomainMessenger
+if [ $L1_CROSS_DOMAIN_MESSENGER_ADDRESS == null ]; then
+    envSet L1_CROSS_DOMAIN_MESSENGER_ADDRESS OVM_L1CrossDomainMessenger
+fi
+
+# build the dump file
+yarn run build:dump
+
 # serve the addrs and the state dump
 exec ./bin/serve_dump.sh

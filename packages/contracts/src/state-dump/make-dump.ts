@@ -20,6 +20,7 @@ export interface RollupDeployConfig {
   }
   l1StandardBridgeAddress: string
   l1FeeWalletAddress: string
+  l1CrossDomainMessengerAddress: string
 }
 
 export const makeStateDump = async (cfg: RollupDeployConfig): Promise<any> => {
@@ -36,26 +37,43 @@ export const makeStateDump = async (cfg: RollupDeployConfig): Promise<any> => {
     },
     OVM_L2StandardBridge: {
       l1TokenBridge: cfg.l1StandardBridgeAddress,
+      messenger: predeploys.OVM_L2CrossDomainMessenger,
     },
     OVM_SequencerFeeVault: {
       l1FeeWallet: cfg.l1FeeWalletAddress,
+    },
+    OVM_ETH: {
+      l2Bridge: predeploys.OVM_L2StandardBridge,
+      _name: 'Ether',
+      _symbol: 'ETH',
+      _decimals: 18,
+    },
+    OVM_L2CrossDomainMessenger: {
+      _status: 1,
+      l1CrossDomainMessenger: cfg.l1CrossDomainMessengerAddress,
     },
   }
 
   const dump = {}
   for (const predeployName of Object.keys(predeploys)) {
     const predeployAddress = predeploys[predeployName]
-    const artifact = getContractArtifact(predeployName)
     dump[predeployAddress] = {
-      code: artifact.deployedBytecode,
+      balance: '00',
       storage: {},
+    }
+
+    if (predeployName === 'OVM_L1MessageSender') {
+      dump[predeployAddress].code = '0x4A60005260206000F3'
+    } else {
+      const artifact = getContractArtifact(predeployName)
+      dump[predeployAddress].code = artifact.deployedBytecode
     }
 
     if (predeployName in variables) {
       const storageLayout = await getStorageLayout(predeployName)
       const slots = computeStorageSlots(storageLayout, variables[predeployName])
-      for (const [key, val] of Object.entries(slots)) {
-        dump[predeployAddress].storage[key] = val
+      for (const slot of slots) {
+        dump[predeployAddress].storage[slot.key] = slot.val
       }
     }
   }

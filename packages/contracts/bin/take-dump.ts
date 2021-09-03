@@ -21,6 +21,8 @@ import { makeStateDump } from '../src/state-dump/make-dump'
     },
     l1StandardBridgeAddress: process.env.L1_STANDARD_BRIDGE_ADDRESS,
     l1FeeWalletAddress: process.env.L1_FEE_WALLET_ADDRESS,
+    l1CrossDomainMessengerAddress:
+      process.env.L1_CROSS_DOMAIN_MESSENGER_ADDRESS,
   })
 
   fs.writeFileSync(outfile, JSON.stringify(dump, null, 4))
